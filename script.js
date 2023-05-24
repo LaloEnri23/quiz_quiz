@@ -1,155 +1,248 @@
-    //targeting different elements
-    const question = document.querySelector('#question');
-    const choices= Array.from (document.querySelectorAll('.choice-text'));
-    const progressText= document.querySelector('#progressText');
-    const scoreText= document.querySelector('#score');
-    const progressBarFull= document.querySelector('#progressBarFull');
-    //
-    let currentQuestion={}
-    let accemptingAnswers = true
-    let score = 0
-    let questionCounter = 0
-    let availableQuestions = []
+/*Declare variables*/
 
-    let questions = [
-        {
-            question: 'Array in JavaScript can be used to store ____ .',
-            choice1: 'other arrays',
-            choice2: 'booleans',
-            choice3: 'numbers and strings',
-            choice4: 'all of the above',
-            answer: 1,
-        },
-        {
-            question: 'String values must be enclosed within ___ when being assigned to variables.',
-            choice1: 'commas',
-            choice2: 'curly brackets',
-            choice3: 'quotes',
-            choice4: 'parenthesis',
-            answer: 2,
-        },
-        {
-            question: 'A very useful tool used during development and debugging for printing content to the debugger is:',
-            choice1: 'JavaScript',
-            choice2: 'terminal/bash',
-            choice3: 'for loops',
-            choice4: 'console log',
-            answer: 3,
-        },
-        {
-            question: 'Commonly used data types DO NOT INCLUDE:',
-            choice1: 'strings',
-            choice2: 'booleans',
-            choice3: 'alerts',
-            choice4: 'numbers',
-            answer: 2,
-        }, 
-        {
-            question: 'The condition in an if / else statement is enclosed within ____ .',
-            choice1: 'quotes',
-            choice2: 'curly brackets',
-            choice3: 'parenthesis',
-            choice4: 'square brackets',
-            answer: 3,
-        },
-    ]
+var intro = document.getElementById("intro");
+var startBtn = document.getElementById("start_button");
+var introPage =document.getElementById("intro_page");
 
-var lastQuestion = 0;
-var quizQuestions = [
-    ['1','2','3','4','5','6']
+var questionPage = document.getElementById("question_page");
+var askQuestion = document.getElementById("show_question");
+
+var reactButtons = document.querySelectorAll(".choices");
+var responseBtn1 = document.getElementById("response_btn1");
+var responseBtn2 = document.getElementById("response_btn2");
+var responseBtn3 = document.getElementById("response_btn3");
+var responseBtn4 = document.getElementById("response_btn4");
+
+var answerCheck = document.getElementById("answer_check");
+var submitPanel = document.getElementById("submit_panel");
+var finalScore = document.getElementById("final_score");
+var userInitial =document.getElementById("initial");
+
+var submitBtn =document.getElementById("submit_btn");
+var showResultsPanel =document.getElementById("show_results_label");
+var highScoreList = document.getElementById("high_score_list");
+var highScoreHeader = document.getElementById("high_score_header");
+
+var clearBtn=document.getElementById("clear_btn");
+
+var timeLeft = document.getElementById("timer");
+var warning = document.getElementById("warning");
+
+var highScoresButton = document.getElementById("highScores_Button");
+var backButton = document.getElementById("backButton");
+
+
+
+    //Define questions (Object)
+var questionSource = [
+    {
+        question: "Questions 1 : Commonly used data types DO NOT include:",
+        choices: ["1. strings", "2. booleans", "3. alerts", "4. numbers"],
+        answer: "3"
+    },
+    {
+        question: "Questions 2 : The condition in an if/else statement is enclosed within _____.",
+        choices: ["1. quotes", "2. early brackets", "3. parentheses", "4. square braces"],
+        answer: "3"
+    },
+    {
+        question: "Questions 3 : Arrays in JavaScript can be used to store _____",
+        choices: ["1. numbers and strings ", "2. other arrays", "3. booleans", "4. all of the above"],
+        answer: "4"
+    },
+    {
+        question: "Questions 4 :String values must be enclosed within _____ when being assigned to variables.",
+        choices: ["1. commas", "2. curly braces", "3. quotes", "4. parentheses"],
+        answer: "3"
+    },
+    {
+        question: "Questions 5 : A very useful tool used during development and debugging for printing content to the debuggers is:",
+        choices: ["1. Javascript", "2. terminal / bash ", "3. for loops", "4. console.log"],
+        answer: "4"
+    },
 ];
 
-function checkAnswer() {
-  // code to check user's answer and move to next question
-    if (lastQuestion == quizQuestions.length - 6) {
-    // if last question, redirect to another page
-        then(href = "./end.js");
+//Declare other variables
+var secondsLeft = 60;
+var questionNumber = 0;
+var totalScore = 0;
+var questionCount = 1;
+
+var scoringList = [];
+
+function countdown() {
+        console.log("inside counter ", secondsLeft);
+    var timerInterval = setInterval(function () {
+
+        secondsLeft--;
+        timeLeft.textContent = "Time left: " + secondsLeft + " s";
+
+        if (secondsLeft <= 0){
+            clearInterval(timerInterval);
+            secondsLeft =0;
+            timeLeft.textContent =  "Time left: " + secondsLeft + " s";
+            // if time is up, show on score board content instead of "all done!"
+            finish.textContent = "Game over!";
+            gameOver();
+
+        } else  if(questionCount >= questionSource.length +1) {
+            clearInterval(timerInterval);
+            secondsLeft =0;
+            timeLeft.textContent =  "Time left: " + secondsLeft + " s";
+            gameOver();
+            } 
+    }, 1000);
+}
+
+    //Click the button to start the quiz
+function startQuiz () {
+    introPage.style.display = "none";
+    questionPage.style.display = "block";
+    highScoresButton.style.display = "none";
+    clearBtn.style.display = "none";
+    questionNumber = 0
+    secondsLeft=60;
+    countdown();
+    showQuestion(questionNumber);
+      
+}
+    //show the questions and responses
+function showQuestion (n) {
+    askQuestion.textContent = questionSource[n].question;
+    responseBtn1.textContent = questionSource[n].choices[0];
+    responseBtn2.textContent = questionSource[n].choices[1];
+    responseBtn3.textContent = questionSource[n].choices[2];
+    responseBtn4.textContent = questionSource[n].choices[3];
+    questionNumber = n;
+}
+
+    //check whether response is right or wrong
+function checkResponse() {
+    
+    answerCheck.style.display = "block";
+    setTimeout(function () {
+        answerCheck.style.display = 'none';
+        warning.textContent = ""
+    }, 1000);
+
+    // if response is right
+    if (questionSource[questionNumber].answer == event.target.value) {
+        answerCheck.textContent = "Correct!"; 
+        totalScore = totalScore + 1;
+        warning.textContent = ""
+    // if response is wrong
+    } else {
+        secondsLeft = secondsLeft - 5;
+        answerCheck.textContent = "Wrong! The correct response is number " + questionSource[questionNumber].answer + " .";
+        warning.textContent = "Minus 5 seconds"
+    }
+
+    if (questionNumber < questionSource.length - 1 ) {
+        showQuestion(questionNumber + 1);
+    } else {
+        gameOver();
+    }
+    questionCount++;
+}
+    
+function gameOver() {
+    warning.textContent = ""
+    questionPage.style.display = "none";
+    submitPanel.style.display = "block";
+    // show final score
+    finalScore.textContent = "Your final score is :" + totalScore;
+    // timeLeft.style.display = "none"; 
+    userInitial.value = ""
+};
+
+function processSubmit() {
+    if(userInitial.value === "" ){
+        alert("Please enter a valid user initial");
+    } 
+    else {
+        submitPanel.style.display = "none";
+        introPage.style.display = "none";
+        questionPage.style.display ="none";
+        backButton.style.display = "block"
+        clearBtn.style.display = "block"
+        highScoresButton.style.display = "block"
+        
+        var scoreItem = {
+            user: userInitial.value,
+            score: totalScore
+        }
+        scoringList = JSON.parse(localStorage.getItem("ScoreList"))|| []
+        console.log(scoringList);
+        scoringList.push(scoreItem);
+        localStorage.setItem("ScoreList", JSON.stringify(scoringList));
+
+        var locallyStoredScores = JSON.parse(localStorage.getItem("ScoreList"));
+        //console.log(sort(locallyStoredScores));
+        console.log(locallyStoredScores)
+        showHighScores(sort(locallyStoredScores));
     }
 }
 
-
-    var count = 60; // 1 minute
-    var wrongAnswers = 0;
-    var timer = setInterval(function() {
-    count--;
-        var minutes = Math.floor(count / 60);
-        var seconds = count % 60;
-        document.getElementById("timer").innerHTML = ("0" + minutes).slice(-2) + ":" + ("0" + seconds).slice(-2);
-        if (count == 0) {
-        clearInterval(timer);
-    // 
-    }
-
-}, 1000);
-
-function incorrectAnswer() {
-    count -= 10; // deduct 10 seconds
-    wrongAnswers++;
-    }
-    
-    
-
-    const SCORE_POINTS = 100
-    const EDUARDO_QUESTIONS = 4
-
-    startGame = () => {
-        questionCounter = 0
-        score =0
-        availableQuestions = [...questions]
-        getNewQuestion()
-    }
-
-    getNewQuestion = () => {
-        if(availableQuestions.length === 0 || questionCounter > EDUARDO_QUESTIONS)
-            localStorage.setItem('mostRecentScore', score)
-            
-            //return window.location.assign('/UCLA-VIRT-FSF-FT-02-2023-U-LOLC/04-Web-APIs/02-Challenge/Assets/end.html')
-
-            questionCounter++
-            progressText.innerText = `Question ${questionCounter} of ${EDUARDO_QUESTIONS}`
-            progressBarFull.style.width = `${(questionCounter/EDUARDO_QUESTIONS) * 100}%`
-
-            const questionsIdex = Math.floor(Math.random() * availableQuestions.length)
-            currentQuestion = availableQuestions [questionsIdex]
-            question.innerText = currentQuestion.question
-
-            choices.forEach(choice => {
-                const number = choice.dataset ['number']
-                choice.innerText = currentQuestion ['choice' + number]
-            })
-
-            availableQuestions.splice(questionsIdex, 1)
-
-            accemptingAnswers = true
-    }
-
-    choices.forEach(choice => {
-        choice.addEventListener('click', e => {
-            if (!accemptingAnswers) return
-
-            accemptingAnswers = false
-            const selectedChoice = e.target
-            const selectedAnswer = selectedChoice.dataset['number']
-
-            let classToApply = selectedAnswer == currentQuestion.answer ? 'correct' : 'incorrect'
-
-            if(classToApply === 'correct'){
-                incrementScore(SCORE_POINTS)
-            }
-
-            selectedChoice.parentElement.classList.add(classToApply)
-
-            setTimeout(() => {
-                selectedChoice.parentElement.classList.remove(classToApply)
-                getNewQuestion()
-            }, 1000)
-        })
+function sort (object) {
+    var sorted = object.sort(function(a, b){
+        return b.score - a.score;
     })
+    return sorted;
+};
 
-    incrementScore = num => {
-        score +=num
-        scoreText.innerText = score
-    }
+function showHighScores (object) {
+    // highScoreHeader.style.display = "block"
+    showResultsPanel.style.display = "block";
+    highScoresButton.style.display = "none";
 
-    startGame()
+    var textNode = document.createTextNode("High Scores");
+    highScoreHeader.appendChild(textNode)
+    
+    showResultsPanel.innerHTML = '';
+    highScoreList.innerHTML = '';
 
+  
+    // console.log(sort(locallyStoredScores));
+    // var object = sort(locallyStoredScores);
+
+    for (var i = 0; i < object.length; i++) {
+        // console.log(object[i]);
+        var li = document.createElement("li");
+        li.textContent = "user: " + (object[i].user).toUpperCase() + "      |      score: " + object[i].score;
+        li.setAttribute("data-index", i);
+        highScoreList.appendChild(li);
+        showResultsPanel.appendChild(highScoreList);
+    }   
+
+   // showResultsPanel.appendChild(highScoreList);
+};
+
+
+function resetGame() {
+    // console.log("INSIDE RESET");
+    introPage.style.display = "block";
+    showResultsPanel.style.display = "none";
+    backButton.style.display = "none";
+    clearBtn.style.display = "none"
+    highScoresButton.style.display = "none";
+    highScoreHeader.innerHTML = '';
+    secondsLeft = 60;
+    questionNumber = 0;
+    totalScore = 0;
+    questionCount = 1;
+}
+function renderScore(){}
+//clear local storage and clear page shows
+clearBtn.addEventListener("click",function(event) {
+    console.log("clicked clearbutton");
+    event.preventDefault();
+        
+    showResultsPanel.innerHTML = '';
+    highScoreList.innerHTML = '';
+
+    localStorage.clear();
+    //renderScore();
+});
+
+
+    
